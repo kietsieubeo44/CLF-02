@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Certified Cloud Practitioner (CLF-C02) Prep Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Application Header -->
+        <header>
+            <div class="logo-section">
+                <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div class="logo-text">
+                    <h1>AWS CLF-C02</h1>
+                    <span>Practice & Mock Exam Portal</span>
+                </div>
+            </div>
+            <div class="nav-controls">
+                <button class="btn btn-text" id="btn-home" onclick="showView('dashboard')">
+                    <i class="fa-solid fa-house"></i> Home
+                </button>
+                <button class="btn btn-text" id="btn-study" onclick="showView('study')">
+                    <i class="fa-solid fa-book-open"></i> Review Mode
+                </button>
+                <button class="btn btn-text" id="btn-exam" onclick="startMockExam()">
+                    <i class="fa-solid fa-square-poll-horizontal"></i> Mock Exam
+                </button>
+                <button class="btn btn-icon" id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-sun" id="theme-icon-light" style="display: none;"></i>
+                    <i class="fa-solid fa-moon" id="theme-icon-dark"></i>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <!-- ================= VIEW 1: DASHBOARD ================= -->
+            <section id="view-dashboard" class="dashboard-view">
+                <div class="welcome-banner">
+                    <div class="welcome-text">
+                        <h2>Prepare for AWS Cloud Practitioner</h2>
+                        <p>Master the CLF-C02 exam with a unified database of 386 actual practice questions. Review them question-by-question with community explanations, or test your skills under real exam conditions.</p>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fa-solid fa-database"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-total-questions">386</h3>
+                            <p>Total Questions</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon cyan"><i class="fa-solid fa-bookmark"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-bookmarks">0</h3>
+                            <p>Bookmarked</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-mastered">0</h3>
+                            <p>Mastered Questions</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon yellow"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-best-score">--%</h3>
+                            <p>Best Exam Score</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modes-container">
+                    <div class="mode-card" onclick="showView('study')">
+                        <div class="mode-badge">Self-Paced Learning</div>
+                        <h3>Study & Review Mode</h3>
+                        <p>Browse through questions sequentially or search keywords. View correct answers instantly, read detailed explanations from community discussions, and mark questions as mastered.</p>
+                        <button class="btn btn-primary">Start Reviewing</button>
+                    </div>
+
+                    <div class="mode-card" onclick="startMockExam()">
+                        <div class="mode-badge">Simulate Real Exam</div>
+                        <h3>Timed Mock Exam</h3>
+                        <p>Simulate standard AWS exam conditions: 65 questions randomly drawn from the question bank, 90 minutes time limit, and immediate scoring with percentage breakdown on submit.</p>
+                        <button class="btn btn-secondary">Start Test</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW 2: STUDY MODE ================= -->
+            <section id="view-study" class="study-view" style="display: none;">
+                <!-- Sidebar filter panel -->
+                <div class="sidebar-panel">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-input" placeholder="Search keywords..." oninput="handleSearch()">
+                    </div>
+
+                    <div>
+                        <div class="filter-group-title">Question Range</div>
+                        <div class="range-list">
+                            <div class="range-item active" id="range-all" onclick="filterByRange('all')">
+                                <span>All Questions</span>
+                                <span class="range-count">386</span>
+                            </div>
+                            <div class="range-item" id="range-1-100" onclick="filterByRange('1-100')">
+                                <span>Questions 1 - 100</span>
+                                <span class="range-count">100</span>
+                            </div>
+                            <div class="range-item" id="range-101-200" onclick="filterByRange('101-200')">
+                                <span>Questions 101 - 200</span>
+                                <span class="range-count">86</span>
+                            </div>
+                            <div class="range-item" id="range-201-300" onclick="filterByRange('201-300')">
+                                <span>Questions 201 - 300</span>
+                                <span class="range-count">100</span>
+                            </div>
+                            <div class="range-item" id="range-301-400" onclick="filterByRange('301-400')">
+                                <span>Questions 301 - 400</span>
+                                <span class="range-count">100</span>
+                            </div>
+                            <div class="range-item" id="range-bookmarked" onclick="filterByRange('bookmarked')">
+                                <span>Bookmarked Only</span>
+                                <span class="range-count" id="badge-bookmark-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-stats">
+                        <div>
+                            <div class="progress-info">
+                                <span>Mastery Progress</span>
+                                <span id="mastery-progress-text">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" id="mastery-progress-fill"></div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="confirmResetProgress()" style="width: 100%; justify-content: center; font-size: 13px;">
+                            <i class="fa-solid fa-rotate-left"></i> Reset All Progress
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main question block -->
+                <div class="question-container">
+                    <div class="question-card" id="study-question-card">
+                        <div class="question-header">
+                            <div class="question-meta">
+                                <span class="question-number-badge" id="study-q-num">Question #1</span>
+                                <span class="question-source" id="study-q-source">Source: PDF 1 Page 3</span>
+                            </div>
+                            <div class="question-actions">
+                                <button class="btn btn-icon" id="btn-bookmark" onclick="toggleBookmarkCurrent()" title="Bookmark question">
+                                    <i class="fa-regular fa-bookmark"></i>
+                                </button>
+                                <button class="btn btn-icon" id="btn-master" onclick="toggleMasteredCurrent()" title="Mark as mastered">
+                                    <i class="fa-regular fa-circle-check"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="question-body" id="study-q-body">
+                            Question body goes here.
+                        </div>
+
+                        <div class="options-list" id="study-options-list">
+                            <!-- Options will be dynamically rendered here -->
+                        </div>
+
+                        <div class="card-actions">
+                            <button class="btn btn-secondary" id="btn-show-answer" onclick="revealAnswer()">
+                                <i class="fa-solid fa-eye"></i> Show Answer & Explanation
+                            </button>
+                            
+                            <div class="nav-buttons">
+                                <button class="btn btn-secondary" onclick="prevQuestion()">
+                                    <i class="fa-solid fa-arrow-left"></i> Prev
+                                </button>
+                                <button class="btn btn-secondary" onclick="nextQuestion()">
+                                    Next <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Explanation container -->
+                    <div class="explanation-panel" id="explanation-panel" style="display: none;">
+                        <div class="explanation-header">
+                            <i class="fa-solid fa-circle-info"></i> Explanation & Discussion Notes
+                        </div>
+                        <div class="explanation-body" id="explanation-body">
+                            Discussion and references...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW 3: MOCK EXAM ================= -->
+            <section id="view-exam" class="exam-view" style="display: none;">
+                <!-- Left Main Question block -->
+                <div class="exam-main">
+                    <div class="exam-bar">
+                        <div class="exam-timer">
+                            <i class="fa-regular fa-clock"></i> <span id="timer-display">90:00</span>
+                        </div>
+                        <div class="nav-buttons">
+                            <button class="btn btn-secondary" id="btn-flag-exam" onclick="toggleExamFlag()">
+                                <i class="fa-regular fa-flag"></i> Flag Question
+                            </button>
+                            <button class="btn btn-primary" onclick="promptSubmitExam()">
+                                <i class="fa-solid fa-circle-check"></i> Submit Exam
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="question-card" id="exam-question-card">
+                        <div class="question-header">
+                            <div class="question-meta">
+                                <span class="question-number-badge" id="exam-progress-badge">Question 1 / 65</span>
+                                <span class="question-source" id="exam-q-real-num">Question #150</span>
+                            </div>
+                        </div>
+
+                        <div class="question-body" id="exam-q-body">
+                            Exam question goes here.
+                        </div>
+
+                        <div class="options-list" id="exam-options-list">
+                            <!-- Exam options rendered here -->
+                        </div>
+
+                        <div class="card-actions" style="justify-content: flex-end;">
+                            <div class="nav-buttons">
+                                <button class="btn btn-secondary" onclick="prevExamQuestion()">
+                                    <i class="fa-solid fa-arrow-left"></i> Prev
+                                </button>
+                                <button class="btn btn-secondary" onclick="nextExamQuestion()">
+                                    Next <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar Navigation Grid -->
+                <div class="sidebar-panel exam-sidebar">
+                    <div class="grid-title">Exam Questions Navigator</div>
+                    <div class="question-grid" id="exam-question-grid">
+                        <!-- Grid buttons generated here -->
+                    </div>
+                    
+                    <div class="grid-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot unanswered"></div>
+                            <span>Unanswered</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot current"></div>
+                            <span>Current</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot answered"></div>
+                            <span>Answered</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot flagged"></div>
+                            <span>Flagged</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW 4: EXAM RESULTS ================= -->
+            <section id="view-results" class="results-view" style="display: none;">
+                <div class="result-card">
+                    <div class="result-status" id="result-status-title">PASSED</div>
+                    
+                    <div class="score-circle" id="result-score-circle">
+                        <span class="score-value" id="result-score-percent">78%</span>
+                        <span class="score-label">Your Score</span>
+                    </div>
+
+                    <div class="results-stats-row">
+                        <div class="result-stat-box">
+                            <h4 id="result-stat-score">51/65</h4>
+                            <p>Correct Questions</p>
+                        </div>
+                        <div class="result-stat-box">
+                            <h4 id="result-stat-passing">70% (46/65)</h4>
+                            <p>Passing Grade</p>
+                        </div>
+                        <div class="result-stat-box">
+                            <h4 id="result-stat-time">14:23</h4>
+                            <p>Time Spent</p>
+                        </div>
+                        <div class="result-stat-box">
+                            <h4 id="result-stat-date">July 4, 2026</h4>
+                            <p>Test Date</p>
+                        </div>
+                    </div>
+
+                    <div class="result-actions">
+                        <button class="btn btn-primary" onclick="startMockExam()">
+                            <i class="fa-solid fa-rotate-right"></i> Try Again
+                        </button>
+                        <button class="btn btn-secondary" onclick="showView('dashboard')">
+                            <i class="fa-solid fa-house"></i> Dashboard
+                        </button>
+                    </div>
+                </div>
+
+                <div class="results-review-section">
+                    <div class="filter-group-title">Review Exam Questions</div>
+                    <div id="results-review-list">
+                        <!-- Review list generated here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ================= CONFIRMATION MODALS ================= -->
+    <!-- Submit Exam Modal -->
+    <div class="modal-overlay" id="modal-submit-exam" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h3>Submit Your Exam?</h3>
+            <p id="submit-modal-text">You have answered 50 out of 65 questions. Are you sure you want to end the test and calculate your final grade?</p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="submitExamFinal()">Yes, Submit</button>
+                <button class="btn btn-secondary" onclick="closeModal('modal-submit-exam')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Progress Modal -->
+    <div class="modal-overlay" id="modal-reset-progress" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-icon" style="color: var(--error);"><i class="fa-solid fa-trash-can"></i></div>
+            <h3>Reset All Progress?</h3>
+            <p>This will permanently delete all mastered progress, bookmarked questions, and high scores. This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" style="background: var(--error); box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25);" onclick="resetProgressFinal()">Reset Everything</button>
+                <button class="btn btn-secondary" onclick="closeModal('modal-reset-progress')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="questions.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
