@@ -55,23 +55,23 @@ const QUESTIONS = [
   },
   {
     "id": 3,
-    "question": "A company has a centralized group of users with large file storage requirements that have exceeded the space available on\npremises. The company wants to extend its file storage capabilities for this group while retaining the performance benefit of\nsharing content locally.\nWhat is the MOST operationally efficient AWS solution for this scenario?\nCreate an Amazon S3 bucket for each user. Mount each bucket by using an S3 file system mounting utility.",
+    "question": "A company has a centralized group of users with large file storage requirements that have exceeded the space available on\npremises. The company wants to extend its file storage capabilities for this group while retaining the performance benefit of\nsharing content locally.\nWhat is the MOST operationally efficient AWS solution for this scenario?",
     "options": [
       {
         "letter": "A",
-        "text": "Configure and deploy an AWS Storage Gateway file gateway. Connect each user's workstation to the file gateway."
+        "text": "Create an Amazon S3 bucket for each user. Mount each bucket by using an S3 file system mounting utility."
       },
       {
         "letter": "B",
-        "text": "Move each user's working environment to Amazon WorkSpaces. Set up an Amazon WorkDocs account for each user."
+        "text": "Configure and deploy an AWS Storage Gateway file gateway. Connect each user's workstation to the file gateway."
       },
       {
         "letter": "C",
-        "text": "Deploy an Amazon EC2 instance and attach an Amazon Elastic Block Store (Amazon EBS) Provisioned IOPS volume."
+        "text": "Move each user's working environment to Amazon WorkSpaces. Set up an Amazon WorkDocs account for each user."
       },
       {
         "letter": "D",
-        "text": "Share the EBS volume directly with the users."
+        "text": "Deploy an Amazon EC2 instance and attach an Amazon Elastic Block Store (Amazon EBS) Provisioned IOPS volume. Share the EBS volume directly with the users."
       }
     ],
     "answer": [
