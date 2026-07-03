@@ -24,6 +24,13 @@ let state = {
         currentIndex: 0,
         timeRemaining: 90 * 60, // 90 minutes in seconds
         timerInterval: null
+    },
+
+    // Course Tracker State
+    course: {
+        completed: [], // list of completed lecture IDs
+        searchQuery: '',
+        activeSection: 'all'
     }
 };
 
@@ -31,6 +38,7 @@ let state = {
 const views = {
     dashboard: document.getElementById('view-dashboard'),
     study: document.getElementById('view-study'),
+    course: document.getElementById('view-course'),
     exam: document.getElementById('view-exam'),
     results: document.getElementById('view-results')
 };
@@ -54,6 +62,7 @@ function loadProgress() {
         state.bookmarks = JSON.parse(localStorage.getItem('aws_quiz_bookmarks')) || [];
         state.mastered = JSON.parse(localStorage.getItem('aws_quiz_mastered')) || [];
         state.bestScore = localStorage.getItem('aws_quiz_best_score') ? parseFloat(localStorage.getItem('aws_quiz_best_score')) : null;
+        state.course.completed = JSON.parse(localStorage.getItem('aws_course_completed')) || [];
     } catch (e) {
         console.error("Failed to load progress from local storage", e);
     }
@@ -64,6 +73,7 @@ function saveProgress() {
     try {
         localStorage.setItem('aws_quiz_bookmarks', JSON.stringify(state.bookmarks));
         localStorage.setItem('aws_quiz_mastered', JSON.stringify(state.mastered));
+        localStorage.setItem('aws_course_completed', JSON.stringify(state.course.completed));
         if (state.bestScore !== null) {
             localStorage.setItem('aws_quiz_best_score', state.bestScore.toString());
         }
@@ -135,11 +145,16 @@ function showView(viewName) {
     document.getElementById('btn-study').classList.toggle('btn-primary', viewName === 'study');
     document.getElementById('btn-study').classList.toggle('btn-text', viewName !== 'study');
     
+    document.getElementById('btn-course').classList.toggle('btn-primary', viewName === 'course');
+    document.getElementById('btn-course').classList.toggle('btn-text', viewName !== 'course');
+    
     document.getElementById('btn-exam').classList.toggle('btn-primary', viewName === 'exam');
     document.getElementById('btn-exam').classList.toggle('btn-text', viewName !== 'exam');
 
     if (viewName === 'study') {
         initStudyMode();
+    } else if (viewName === 'course') {
+        initCourseTrackerMode();
     } else if (viewName === 'dashboard') {
         initDashboard();
     }
@@ -805,7 +820,201 @@ function resetProgressFinal() {
     localStorage.removeItem('aws_quiz_bookmarks');
     localStorage.removeItem('aws_quiz_mastered');
     localStorage.removeItem('aws_quiz_best_score');
+    localStorage.removeItem('aws_course_completed');
     
     // Hard refresh to reload clean app state
     window.location.reload();
+}
+
+// ================= COURSE TRACKER CONTROLLER =================
+
+function initCourseTrackerMode() {
+    state.course.searchQuery = '';
+    document.getElementById('course-search-input').value = '';
+    state.course.activeSection = 'all';
+    
+    renderCourseSections();
+    renderCourseLectures();
+    calculateCourseProgress();
+}
+
+function calculateCourseProgress() {
+    const total = COURSE_LECTURES.length;
+    const completedCount = state.course.completed.length;
+    const percent = total > 0 ? (completedCount / total) * 100 : 0;
+    
+    document.getElementById('course-progress-text').innerText = `${percent.toFixed(0)}%`;
+    document.getElementById('course-progress-fill').style.width = `${percent}%`;
+    document.getElementById('course-progress-detail').innerText = `${completedCount} / ${total} completed`;
+}
+
+function renderCourseSections() {
+    const sectionList = document.getElementById('course-section-list');
+    if (!sectionList) return;
+    
+    sectionList.innerHTML = '';
+    
+    // Create 'All Sections' item
+    const allItem = document.createElement('div');
+    allItem.className = `range-item ${state.course.activeSection === 'all' ? 'active' : ''}`;
+    allItem.onclick = () => filterCourseBySection('all');
+    allItem.innerHTML = `
+        <span>All Lectures</span>
+        <span class="range-count">${COURSE_LECTURES.length}</span>
+    `;
+    sectionList.appendChild(allItem);
+    
+    // Get unique sections in order
+    const sections = [];
+    const sectionStats = {};
+    
+    COURSE_LECTURES.forEach(l => {
+        if (!sections.includes(l.section)) {
+            sections.push(l.section);
+            sectionStats[l.section] = { total: 0, completed: 0 };
+        }
+        sectionStats[l.section].total++;
+        if (state.course.completed.includes(l.id)) {
+            sectionStats[l.section].completed++;
+        }
+    });
+    
+    sections.forEach(secName => {
+        const item = document.createElement('div');
+        item.className = `range-item ${state.course.activeSection === secName ? 'active' : ''}`;
+        item.onclick = () => filterCourseBySection(secName);
+        
+        // Shorten the section title if it's too long
+        const displayName = secName.replace(/^Section \d+:\s+/, '');
+        
+        item.innerHTML = `
+            <span title="${secName}">${displayName}</span>
+            <span class="range-count">${sectionStats[secName].completed}/${sectionStats[secName].total}</span>
+        `;
+        sectionList.appendChild(item);
+    });
+}
+
+function renderCourseLectures() {
+    const wrapper = document.getElementById('course-sections-wrapper');
+    if (!wrapper) return;
+    
+    wrapper.innerHTML = '';
+    
+    // Group lectures by section
+    const grouped = {};
+    COURSE_LECTURES.forEach(l => {
+        // Filter by section
+        if (state.course.activeSection !== 'all' && l.section !== state.course.activeSection) {
+            return;
+        }
+        // Filter by search query
+        if (state.course.searchQuery && !l.title.toLowerCase().includes(state.course.searchQuery)) {
+            return;
+        }
+        
+        if (!grouped[l.section]) {
+            grouped[l.section] = [];
+        }
+        grouped[l.section].push(l);
+    });
+    
+    const sections = Object.keys(grouped).sort((a, b) => {
+        // extract section numbers for sorting
+        const numA = parseInt(a.match(/Section (\d+):/)[1]);
+        const numB = parseInt(b.match(/Section (\d+):/)[1]);
+        return numA - numB;
+    });
+    
+    if (sections.length === 0) {
+        wrapper.innerHTML = `
+            <div class="no-results-placeholder" style="text-align: center; padding: 48px; color: var(--text-secondary);">
+                <i class="fa-solid fa-face-frown" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <p>No lectures found matching "${state.course.searchQuery}"</p>
+            </div>
+        `;
+        return;
+    }
+    
+    sections.forEach(secName => {
+        const secLectures = grouped[secName];
+        
+        const secDiv = document.createElement('div');
+        secDiv.className = 'course-section-block';
+        
+        const secHeader = document.createElement('div');
+        secHeader.className = 'course-section-header';
+        secHeader.innerHTML = `<h3>${secName}</h3>`;
+        secDiv.appendChild(secHeader);
+        
+        const listDiv = document.createElement('div');
+        listDiv.className = 'course-lecture-list';
+        
+        secLectures.forEach(l => {
+            const isCompleted = state.course.completed.includes(l.id);
+            const item = document.createElement('div');
+            item.className = `lecture-item ${isCompleted ? 'completed' : ''}`;
+            item.onclick = (e) => {
+                toggleLectureCompleted(l.id);
+            };
+            
+            item.innerHTML = `
+                <div class="lecture-checkbox">
+                    <i class="${isCompleted ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i>
+                </div>
+                <div class="lecture-details">
+                    <span class="lecture-num">Lecture ${l.lecture_num}</span>
+                    <span class="lecture-title">${l.title}</span>
+                </div>
+                <div class="lecture-status-badge">
+                    ${isCompleted ? '<span class="status-badge completed">Done</span>' : '<span class="status-badge todo">To Do</span>'}
+                </div>
+            `;
+            listDiv.appendChild(item);
+        });
+        
+        secDiv.appendChild(listDiv);
+        wrapper.appendChild(secDiv);
+    });
+}
+
+function toggleLectureCompleted(lectureId) {
+    const idx = state.course.completed.indexOf(lectureId);
+    if (idx > -1) {
+        state.course.completed.splice(idx, 1);
+    } else {
+        state.course.completed.push(lectureId);
+    }
+    
+    saveProgress();
+    calculateCourseProgress();
+    renderCourseSections();
+    renderCourseLectures();
+}
+
+function handleCourseSearch() {
+    state.course.searchQuery = document.getElementById('course-search-input').value.trim().toLowerCase();
+    renderCourseLectures();
+}
+
+function filterCourseBySection(sectionName) {
+    state.course.activeSection = sectionName;
+    
+    // Update active class in sidebar list
+    const items = document.querySelectorAll('#course-section-list .range-item');
+    items.forEach(it => it.classList.remove('active'));
+    
+    renderCourseSections();
+    renderCourseLectures();
+}
+
+function confirmResetCourseProgress() {
+    openModal('modal-reset-course-progress');
+}
+
+function resetCourseProgressFinal() {
+    closeModal('modal-reset-course-progress');
+    state.course.completed = [];
+    saveProgress();
+    initCourseTrackerMode();
 }

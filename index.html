@@ -25,6 +25,9 @@
                 <button class="btn btn-text" id="btn-study" onclick="showView('study')">
                     <i class="fa-solid fa-book-open"></i> Review Mode
                 </button>
+                <button class="btn btn-text" id="btn-course" onclick="showView('course')">
+                    <i class="fa-solid fa-video"></i> Course Tracker
+                </button>
                 <button class="btn btn-text" id="btn-exam" onclick="startMockExam()">
                     <i class="fa-solid fa-square-poll-horizontal"></i> Mock Exam
                 </button>
@@ -202,6 +205,54 @@
                 </div>
             </section>
 
+            <!-- ================= VIEW 5: COURSE TRACKER ================= -->
+            <section id="view-course" class="study-view" style="display: none;">
+                <!-- Sidebar filter panel -->
+                <div class="sidebar-panel">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="course-search-input" placeholder="Search lectures..." oninput="handleCourseSearch()">
+                    </div>
+
+                    <div>
+                        <div class="filter-group-title">Course Sections</div>
+                        <div class="range-list" id="course-section-list">
+                            <!-- Course sections list will be populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="sidebar-stats">
+                        <div>
+                            <div class="progress-info">
+                                <span>Course Progress</span>
+                                <span id="course-progress-text">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" id="course-progress-fill"></div>
+                            </div>
+                            <div class="progress-sub-text" style="font-size: 11px; margin-top: 4px; color: var(--text-secondary);" id="course-progress-detail">
+                                0 / 277 completed
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="confirmResetCourseProgress()" style="width: 100%; justify-content: center; font-size: 13px;">
+                            <i class="fa-solid fa-rotate-left"></i> Reset Course Progress
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main course content block -->
+                <div class="question-container course-container">
+                    <div class="course-header-banner">
+                        <h2>Ultimate AWS Cloud Practitioner CLF-C02</h2>
+                        <p>Track your study progress for Stephane Maarek's comprehensive video lecture course. Use this tracker alongside your quiz reviews to maximize your exam preparation.</p>
+                    </div>
+                    
+                    <div class="course-sections-wrapper" id="course-sections-wrapper">
+                        <!-- Grouped lectures will be populated here -->
+                    </div>
+                </div>
+            </section>
+
             <!-- ================= VIEW 3: MOCK EXAM ================= -->
             <section id="view-exam" class="exam-view" style="display: none;">
                 <!-- Left Main Question block -->
@@ -353,8 +404,22 @@
         </div>
     </div>
 
+    <!-- Reset Course Progress Modal -->
+    <div class="modal-overlay" id="modal-reset-course-progress" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-icon" style="color: var(--error);"><i class="fa-solid fa-trash-can"></i></div>
+            <h3>Reset Course Progress?</h3>
+            <p>This will permanently clear your checked lectures progress. This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" style="background: var(--error); box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25);" onclick="resetCourseProgressFinal()">Reset Progress</button>
+                <button class="btn btn-secondary" onclick="closeModal('modal-reset-course-progress')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="questions.js"></script>
+    <script src="course_data.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
